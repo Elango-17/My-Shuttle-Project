@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PageOperations
+namespace AppOperations
 {
-    internal interface ILogin
+    public interface ILoginError
     {
     }
 }
