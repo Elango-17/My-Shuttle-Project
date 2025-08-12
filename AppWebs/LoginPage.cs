@@ -1,5 +1,6 @@
-﻿using OpenQA.Selenium;
-using AppOperations;
+﻿using AppOperations;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
 
 namespace AppWeb
 {
@@ -7,13 +8,13 @@ namespace AppWeb
     {
         private readonly IWebDriver _driver;
 
-        // Locators
-        private readonly By logoLocator = By.Id("appLogo"); // Adjust based on actual ID
-        private readonly By loginFormLocator = By.Id("loginForm"); // Adjust based on actual form container
-        private readonly By usernameInput = By.Id("username");
+        // Updated locators
+        private readonly By logoLocator = By.CssSelector("img[src*='logologin.png']");
+        private readonly By loginFormLocator = By.CssSelector("form[action='login'][method='post']");
+        private readonly By usernameInput = By.Id("email");  // Changed from "username" to "email"
         private readonly By passwordInput = By.Id("password");
-        private readonly By loginButton = By.Id("loginButton");
-        private readonly By errorMessageLocator = By.ClassName("error-message"); // Adjust based on your actual class
+        private readonly By loginButton = By.CssSelector("input[type='submit'][value='Log in']");
+        private readonly By errorMessageLocator = By.ClassName("error-message"); // Keep or update if error markup changes
 
         public LoginPage(IWebDriver driver)
         {
@@ -53,13 +54,23 @@ namespace AppWeb
         {
             try
             {
-                return _driver.FindElement(errorMessageLocator).Text;
+                // Wait for either h2 or p in the jumbotron
+                var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
+                var errorHeader = wait.Until(d => d.FindElement(By.CssSelector(".jumbotron h2")));
+                var errorParagraph = _driver.FindElement(By.CssSelector(".jumbotron p"));
+
+                return $"{errorHeader.Text} {errorParagraph.Text}".Trim();
             }
             catch (NoSuchElementException)
             {
                 return string.Empty;
             }
+            catch (WebDriverTimeoutException)
+            {
+                return string.Empty;
+            }
         }
+
 
         public bool IsLoginButtonEnabled()
         {
@@ -68,7 +79,6 @@ namespace AppWeb
 
         public bool IsLoginSuccessful()
         {
-            // Example check: replace with actual logic like checking redirection or session
             return !_driver.Url.Contains("login");
         }
     }
