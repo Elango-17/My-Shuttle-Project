@@ -1,64 +1,67 @@
 ﻿using OpenQA.Selenium;
-using AppOperations;
+using System;
 
-namespace AppWeb
+namespace AppOperations
 {
-    public class DashboardPage : IDashboard
+    public class DashboardPage : IDashboardPage
     {
         private readonly IWebDriver _driver;
 
-        // Constructor
+        private readonly By dashboardHeader = By.CssSelector("h1.dashboard-title");
+        private readonly By logo = By.CssSelector("img.site-logo");
+        private readonly By internalMessage = By.CssSelector("div.welcome-msg");
+        private readonly By fareHistoryLink = By.LinkText("Fare History");
+        private readonly By signOutButton = By.Id("logout");
+
         public DashboardPage(IWebDriver driver)
         {
-            _driver = driver;
+            _driver = driver ?? throw new ArgumentNullException(nameof(driver));
         }
 
-        // Locators
-        private By dashboardContainer => By.Id("dashboard-container"); // Example ID
-        private By fareHistoryButton => By.Id("fare-history");         // Adjust as per actual locator
-        private By signOutButton => By.Id("sign-out");                 // Adjust as per actual locator
-        private By userLabel => By.Id("user-status");                  // Could be for login status
-        private By internalUseLabel => By.XPath("//*[text()='Internal Use Only']");
-
-        // Methods matching interface
-
-        public bool IsDashboardVisible()
+        public bool IsDashboardHeaderVisible()
         {
-            return _driver.FindElement(dashboardContainer).Displayed;
+            try
+            {
+                return _driver.FindElement(dashboardHeader).Displayed;
+            }
+            catch (NoSuchElementException)
+            {
+                return false;
+            }
+        }
+
+        public bool IsLogoVisible()
+        {
+            try
+            {
+                return _driver.FindElement(logo).Displayed;
+            }
+            catch (NoSuchElementException)
+            {
+                return false;
+            }
+        }
+
+        public string GetInternalMessage()
+        {
+            try
+            {
+                return _driver.FindElement(internalMessage).Text;
+            }
+            catch (NoSuchElementException)
+            {
+                return string.Empty;
+            }
         }
 
         public void ClickFareHistory()
         {
-            _driver.FindElement(fareHistoryButton).Click();
+            _driver.FindElement(fareHistoryLink).Click();
         }
 
         public void ClickSignOut()
         {
             _driver.FindElement(signOutButton).Click();
-        }
-
-        public bool IsUserLoggedIn()
-        {
-            try
-            {
-                return _driver.FindElement(userLabel).Displayed;
-            }
-            catch (NoSuchElementException)
-            {
-                return false;
-            }
-        }
-
-        public bool IsInternalUseOnlyLabelVisible()
-        {
-            try
-            {
-                return _driver.FindElement(internalUseLabel).Displayed;
-            }
-            catch (NoSuchElementException)
-            {
-                return false;
-            }
         }
     }
 }
