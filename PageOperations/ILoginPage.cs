@@ -8,6 +8,7 @@ namespace AppOperations
 {
     public interface ILoginPage
     {
+
         bool IsLogoVisible();
         bool IsLoginFormVisible();
         void EnterUsername(string username);

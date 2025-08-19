@@ -13,7 +13,7 @@ namespace AppWeb
         [SetUp]
         public void Setup()
         {
-            _loginPage = LoginPageFactory.Create(headless: true);
+            _loginPage = LogiPageFactory.Create(headless: true);
         }
 
         [TearDown]

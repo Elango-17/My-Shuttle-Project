@@ -5,7 +5,7 @@ using AppWeb;
 
 namespace Utilities
 {
-    public static class LoginPageFactory
+    public static class LogiPageFactory
     {
         public static ILoginPage Create(bool headless = false)
         {

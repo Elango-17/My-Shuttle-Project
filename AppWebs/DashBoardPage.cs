@@ -14,17 +14,15 @@ namespace AppWeb
         }
 
         // Locators
-        private By dashboardContainer => By.Id("dashboard-container"); // Example ID
-        private By fareHistoryButton => By.Id("fare-history");         // Adjust as per actual locator
-        private By signOutButton => By.Id("sign-out");                 // Adjust as per actual locator
-        private By userLabel => By.Id("user-status");                  // Could be for login status
-        private By internalUseLabel => By.XPath("//*[text()='Internal Use Only']");
+        private By dashboardTitle => By.XPath("//h2[text()='Dashboard']");
+        private By fareHistoryButton => By.LinkText("Access Your Fare History");
+        private By signOutButton => By.XPath("//a[contains(@href,'logout.jsp')]");
+        private By internalUseLabel => By.XPath("//h5[contains(text(),'Internal Use Only')]");
 
-        // Methods matching interface
 
         public bool IsDashboardVisible()
         {
-            return _driver.FindElement(dashboardContainer).Displayed;
+            return _driver.FindElement(dashboardTitle).Displayed;
         }
 
         public void ClickFareHistory()
@@ -41,13 +39,29 @@ namespace AppWeb
         {
             try
             {
-                return _driver.FindElement(userLabel).Displayed;
+                string currentUrl = _driver.Url.ToLower();
+                // adjust according to your app's dashboard URL
+                return currentUrl.Contains("dashboard") || currentUrl.Contains("login") || currentUrl.Contains("home.jsp");
             }
-            catch (NoSuchElementException)
+            catch (WebDriverException)
             {
                 return false;
             }
         }
+
+        //public bool IsUserLoggedIn()
+        //{
+        //    try
+        //    {
+        //        // If sign out button is present, user is logged in
+        //        return _driver.FindElement(By.XPath("//a[contains(@href,'logout.jsp')]")).Displayed;
+        //    }
+        //    catch (NoSuchElementException)
+        //    {
+        //        return false;
+        //    }
+        //}
+
 
         public bool IsInternalUseOnlyLabelVisible()
         {

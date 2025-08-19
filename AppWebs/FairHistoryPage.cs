@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AppOperations;
 
 namespace AppWeb
@@ -15,19 +16,38 @@ namespace AppWeb
             this.driver = driver;
         }
 
-        // Locators (update based on your actual HTML)
-        private By fareTable = By.Id("fareTable");
-        private By fareRows = By.CssSelector("#fareTable tbody tr");
-        private By dashboardButton = By.Id("dashboardBtn");
-        private By internalUseOnlyLabel = By.XPath("//footer[contains(text(), 'Internal Use Only')]");
-        private By searchInput = By.Id("searchInput");
-        private By columnHeader(string columnName) => By.XPath($"//th[contains(text(), '{columnName}')]");
+        // Locators
+        private By headingLocator = By.CssSelector("h2");
+        private By fareTable = By.CssSelector("table.table.table-striped.table-condensed");
+        private By fareRows = By.CssSelector("table.table.table-striped.table-condensed tbody tr");
+        private By dashboardButton = By.CssSelector("a[href*='home.jsp']");
+        private By internalUseOnlyLabel = By.XPath("//h5[contains(text(),'Internal Use Only')]");
+        private By allHeaders = By.CssSelector("table.table.table-striped.table-condensed tr.info th");
+        //private By columnHeader(string columnName) => By.XPath($"//table[contains(@class,'table')]//th[normalize-space()='{columnName}']");
 
         // Methods implementing the IFairHistory interface
 
+        // Get the <h2> heading text
+        public string GetPageHeading()
+        {
+            return driver.FindElement(headingLocator).Text.Trim();
+        }
+
+        public string GetLoggedInUserName()
+        {
+            return driver.FindElement(userNameLocator).Text.Trim();
+        }
+
         public bool IsFareTableVisible()
         {
-            return driver.FindElement(fareTable).Displayed;
+            try
+            {
+                return driver.FindElement(fareTable).Displayed;
+            }
+            catch (NoSuchElementException)
+            {
+                return false;
+            }
         }
 
         public int GetNumberOfFareRecords()
@@ -39,21 +59,20 @@ namespace AppWeb
         {
             var rows = driver.FindElements(fareRows);
             if (rowIndex < 0 || rowIndex >= rows.Count)
-                throw new ArgumentOutOfRangeException("Row index is out of range");
+                throw new ArgumentOutOfRangeException(nameof(rowIndex), "Row index is out of range");
 
-            return rows[rowIndex].Text;
+            return rows[rowIndex].Text.Trim();
         }
 
         public void SortFareHistoryBy(string columnName)
         {
-            driver.FindElement(columnHeader(columnName)).Click();
-        }
+            var header = driver.FindElements(allHeaders)
+                               .FirstOrDefault(h => h.Text.Trim().Equals(columnName, StringComparison.OrdinalIgnoreCase));
 
-        public void FilterFareHistory(string searchTerm)
-        {
-            var search = driver.FindElement(searchInput);
-            search.Clear();
-            search.SendKeys(searchTerm);
+            if (header == null)
+                throw new ArgumentException($"Column '{columnName}' not found in fare history table.");
+
+            header.Click();
         }
 
         public void ClickBackToDashboard()
@@ -63,7 +82,30 @@ namespace AppWeb
 
         public bool IsInternalUseOnlyLabelVisible()
         {
-            return driver.FindElement(internalUseOnlyLabel).Displayed;
+            try
+            {
+                return driver.FindElement(internalUseOnlyLabel).Displayed;
+            }
+            catch (NoSuchElementException)
+            {
+                return false;
+            }
+        }
+
+
+        public IList<string> GetAllColumnHeaders()
+        {
+            return driver.FindElements(allHeaders)
+                         .Select(th => th.Text.Trim())
+                         .Where(text => !string.IsNullOrEmpty(text))
+                         .ToList();
+        }
+
+
+        public bool HasColumn(string columnName)
+        {
+            return GetAllColumnHeaders().Any(h =>
+                h.Equals(columnName, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
