@@ -1,75 +1,60 @@
 ﻿using NUnit.Framework;
 using AppOperations;
 using Utilities;
+using System;
 
 namespace AppWeb
 {
     [TestFixture]
-    public class DashboardPageScenarios
+    public class DashboardPageTests
     {
-        private ILoginPage _loginPage;
-        private IDashboardPage _dashboardPage;
+        private IDashboard _dashboard;
 
         [SetUp]
-        public void SetUp()
+        public void Setup()
         {
-            // Get login page (driver created internally in LoginPageFactory)
-            _loginPage = LoginPageFactory.Create();
-
-            // Perform login (credentials only here)
-            _loginPage.EnterUsername("fred");
-            _loginPage.EnterPassword("fredpassword");
-            _loginPage.ClickLogin();
-
-            // Get driver through factory helper (so we don’t touch LoginPage directly)
-            var driver = DriverFactory.GetDriverFrom(_loginPage);
-
-            // Create dashboard with the same driver
-            _dashboardPage = DashboardPageFactory.Create(driver);
+             _dashboard = DashboardPageFactory.Create(headless: true);
         }
-
+              
         [TearDown]
         public void TearDown()
         {
-            // Close driver via helper factory
-            DriverFactory.QuitDriver(_loginPage);
+            if (_dashboard is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
         }
 
         [Test]
-        public void Dashboard_Header_ShouldBeVisible()
+        public void Dashboard_Should_Be_Visible()
         {
-            Assert.IsTrue(_dashboardPage.IsDashboardHeaderVisible(),
-                "Dashboard header should be visible after login.");
+            Assert.IsTrue(_dashboard.IsDashboardVisible(), "Dashboard page should be visible after login.");
         }
 
         [Test]
-        public void Dashboard_Logo_ShouldBeVisible()
+        public void InternalUseOnly_Label_Should_Be_Visible()
         {
-            Assert.IsTrue(_dashboardPage.IsLogoVisible(),
-                "Dashboard logo should be visible.");
+            Assert.IsTrue(_dashboard.IsInternalUseOnlyLabelVisible(), "Internal Use Only label should be visible on dashboard.");
         }
 
         [Test]
-        public void Dashboard_InternalMessage_ShouldMatch()
+        public void User_Should_Be_LoggedIn_On_Dashboard()
         {
-            string message = _dashboardPage.GetInternalMessage();
-            Assert.IsNotNull(message, "Internal message should not be null.");
-            TestContext.WriteLine($"Internal Message: {message}");
+            Assert.IsTrue(_dashboard.IsUserLoggedIn(), "User should be logged in when on the dashboard.");
         }
 
         [Test]
-        public void Dashboard_FareHistory_ShouldBeClickable()
+        public void FareHistory_Should_Navigate_When_Clicked()
         {
-            Assert.DoesNotThrow(() => _dashboardPage.ClickFareHistory(),
-                "Fare history button should be clickable.");
+            _dashboard.ClickFareHistory();
+            Assert.IsTrue(_dashboard.IsUserLoggedIn(), "User should remain logged in after accessing fare history.");
         }
 
         [Test]
-        public void Dashboard_SignOut_ShouldWork()
+        public void SignOut_Should_Log_User_Out()
         {
-            _dashboardPage.ClickSignOut();
-            Assert.IsTrue(_loginPage.IsLoginFormVisible(),
-                "After signing out, login form should be visible.");
+            _dashboard.ClickSignOut();
+            Assert.IsFalse(_dashboard.IsUserLoggedIn(), "User should be logged out after clicking Sign Out.");
         }
     }
 }
