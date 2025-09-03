@@ -10,4 +10,8 @@
     <None Include="IDashboard.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="DotNetSeleniumExtras.WaitHelpers" Version="3.11.0" />
+  </ItemGroup>
+
 </Project>
