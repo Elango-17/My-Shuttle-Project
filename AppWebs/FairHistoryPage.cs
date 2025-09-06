@@ -35,7 +35,9 @@ namespace AppWeb
 
         public string GetLoggedInUserName()
         {
-            return driver.FindElement(userNameLocator).Text.Trim();
+            string fullHeading = driver.FindElement(headingLocator).Text.Trim();
+            string[] words = fullHeading.Split(' ');
+            return words.Last();
         }
 
         public bool IsFareTableVisible()
