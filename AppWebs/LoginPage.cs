@@ -152,7 +152,7 @@ namespace AppWeb
         {
             try
             {
-                var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
+                var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(7));
                 var errorHeader = wait.Until(d => d.FindElement(By.CssSelector(".jumbotron h2")));
                 var errorParagraph = _driver.FindElement(By.CssSelector(".jumbotron p"));
 
