@@ -56,7 +56,7 @@ namespace AppWeb
         [SetUp]
         public void Setup()
         {
-            _loginPage = LogiPageFactory.Create(headless: true);
+            _loginPage = LogiPageFactory.Create(headless: false);
         }
 
         /// <summary>
